@@ -20,16 +20,6 @@ jobs:
       - name: Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Caches einrichten
-        uses: actions/cache@v4
-        with:
-          # PLATFORMIO_CORE_DIR ist im Image auf /opt/platformio gesetzt
-          path: |
-            /opt/platformio
-            .pio/libdeps
-          key: ${{ runner.os }}-pio-native-${{ hashFiles('**/platformio.ini') }}
-          restore-keys: ${{ runner.os }}-pio-native-
-
       - name: Unit-Tests ausführen
         run: |
           set -o pipefail
