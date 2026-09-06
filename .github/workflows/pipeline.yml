@@ -31,7 +31,7 @@ jobs:
           # PLATFORMIO_CORE_DIR ist im Image auf /opt/platformio gesetzt
           path: |
             /opt/platformio
-            tag7_praxisaufgabe1/.pio/libdeps
+            /.pio/libdeps
           key: ${{ runner.os }}-pio-native-${{ hashFiles('**/platformio.ini') }}
           restore-keys: ${{ runner.os }}-pio-native-
 
