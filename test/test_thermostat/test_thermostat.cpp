@@ -44,6 +44,7 @@ TEST_F(ThermostatTest, ReturnsSetpointAndHysteresisFromConstructor) {
 
 TEST_F(ThermostatTest, UpdateReadsSensorExactlyOnce) {
     EXPECT_CALL(sensor, read()).Times(1).WillOnce(Return(18.0));
+    std::cout << "Hallo" << std::endl;
 
     thermostat.update();
 }
