@@ -1,0 +1,58 @@
+name: PlatformIO CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+# Das PlatformIO-Projekt liegt im Unterordner, nicht im Repo-Root
+defaults:
+  run:
+    working-directory: tag7_praxisaufgabe1
+
+jobs:
+  unit-tests:
+    name: Unit-Tests (native)
+    runs-on: ubuntu-latest
+
+    # Derselbe Container wie lokal (siehe dockerplatformio/.dockercontainer/dockerfile)
+    container:
+      image: ghcr.io/zembedded/embedded-systems-plattfomio:latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Caches einrichten
+        uses: actions/cache@v4
+        with:
+          # PLATFORMIO_CORE_DIR ist im Image auf /opt/platformio gesetzt
+          path: |
+            /opt/platformio
+            tag7_praxisaufgabe1/.pio/libdeps
+          key: ${{ runner.os }}-pio-native-${{ hashFiles('**/platformio.ini') }}
+          restore-keys: ${{ runner.os }}-pio-native-
+
+      - name: Unit-Tests ausführen
+        run: |
+          set -o pipefail
+          pio test -e native 2>&1 | tee test-output.txt
+
+      - name: Sicherstellen, dass Testfaelle gelaufen sind
+        run: |
+          # "0 test cases" meldet PlatformIO als PASSED mit Exit-Code 0.
+          # Ordner unter test/ werden nur als Test-Suite erkannt, wenn sie mit test_ beginnen.
+          if grep -qE '(^|[= ])0 test cases' test-output.txt; then
+            echo "::error::Es wurde kein einziger Testfall gelinkt - heisst jeder Ordner unter test/ 'test_*'?"
+            exit 1
+          fi
+
+      - name: Testprotokoll hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: tag7_praxisaufgabe1/test-output.txt
+          if-no-files-found: ignore
