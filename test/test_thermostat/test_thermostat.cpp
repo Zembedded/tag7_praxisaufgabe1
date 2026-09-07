@@ -34,7 +34,7 @@ class ThermostatTest : public ::testing::Test {
 };
 
 TEST_F(ThermostatTest, StartsIdle) {
-    EXPECT_TRUE(thermostat.isHeating());
+    EXPECT_FALSE(thermostat.isHeating());
 }
 
 TEST_F(ThermostatTest, ReturnsSetpointAndHysteresisFromConstructor) {
