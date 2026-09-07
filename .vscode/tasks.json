@@ -1,0 +1,80 @@
+{
+    // Fuehrt die Unit-Tests im selben Docker-Container aus wie die CI-Pipeline.
+    // Docker laeuft in der WSL, deshalb der Umweg ueber wsl.exe.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Unit-Tests (Docker/WSL)",
+            "type": "process",
+            "command": "wsl.exe",
+            "args": [
+                // --cd uebersetzt den Windows-Pfad automatisch nach /mnt/c/...
+                "--cd", "${workspaceFolder}",
+                "-e", "bash", "-lc",
+                "docker run --rm -v \"$PWD\":/workspace embedded-systems-plattfomio:latest pio test -e native"
+            ],
+            "group": {
+                "kind": "build",
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            // PlatformIO gibt Pfade bereits projektrelativ aus: test/...cpp:60: Failure
+            "problemMatcher": {
+                "owner": "cpp",
+                "source": "googletest",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^(.+\\.(?:cpp|hpp|h|c)):(\\d+):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "message": 3
+                }
+            }
+        },
+        {
+            "label": "Unit-Tests ausfuehrlich (Docker/WSL)",
+            "type": "process",
+            "command": "wsl.exe",
+            "args": [
+                "--cd", "${workspaceFolder}",
+                "-e", "bash", "-lc",
+                "docker run --rm -v \"$PWD\":/workspace embedded-systems-plattfomio:latest pio test -e native -v"
+            ],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Unit-Tests gefiltert (Docker/WSL)",
+            "type": "process",
+            "command": "wsl.exe",
+            "args": [
+                "--cd", "${workspaceFolder}",
+                "-e", "bash", "-lc",
+                "docker run --rm -v \"$PWD\":/workspace embedded-systems-plattfomio:latest pio test -e native -a \"--gtest_filter=${input:gtestFilter}\""
+            ],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            // gtest-Muster, z.B. *Hysteresis* oder ThermostatTest.StartsIdle
+            "id": "gtestFilter",
+            "type": "promptString",
+            "description": "--gtest_filter (Muster, * und : erlaubt)",
+            "default": "*"
+        }
+    ]
+}

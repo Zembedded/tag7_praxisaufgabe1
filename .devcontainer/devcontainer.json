@@ -1,0 +1,33 @@
+{
+    // Gleiches Image wie die CI-Pipeline (siehe .github/workflows/pipeline.yml)
+    // und wie die Docker-Task in .vscode/tasks.json.
+    "name": "PlatformIO (Embedded Systems)",
+    "image": "ghcr.io/zembedded/embedded-systems-plattfomio:latest",
+
+    // Das Image setzt WORKDIR /workspace - dorthin mounten, damit Pfade
+    // mit CI und Task uebereinstimmen.
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+
+    // Das Image bringt KEINE vorinstallierten Plattformen mit; pio laedt
+    // native + tool-scons in /root/.platformio. Ohne dieses Volume passiert
+    // das nach jedem Rebuild erneut (~45 s).
+    "mounts": [
+        "source=pio-core,target=/root/.platformio,type=volume"
+    ],
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "platformio.platformio-ide"
+            ],
+            "settings": {
+                // pio liegt bereits im Image (/usr/local/bin/pio). Die Extension
+                // darf keinen eigenen Core und kein eigenes Python daneben
+                // installieren.
+                "platformio-ide.useBuiltinPIOCore": false,
+                "platformio-ide.useBuiltinPython": false
+            }
+        }
+    }
+}
